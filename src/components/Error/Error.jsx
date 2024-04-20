@@ -1,9 +1,10 @@
+//STYLES
 import { StyledP } from './Error.styled';
 
-export default function Error({ message }) {
+export default function Error({ error }) {
   return (
     <>
-      <StyledP>{message}</StyledP>
+      <StyledP>{error}</StyledP>
       <StyledP>Please try again</StyledP>
     </>
   );

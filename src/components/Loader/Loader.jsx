@@ -1,4 +1,7 @@
+//IMPORT
 import { InfinitySpin } from 'react-loader-spinner';
+
+//STYLES
 import { StyledDiv } from './Loader.styled';
 
 export default function Loader() {

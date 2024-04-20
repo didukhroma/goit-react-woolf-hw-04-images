@@ -1,108 +1,99 @@
-import { Component } from 'react';
-
+//IMPORT
+import { useEffect, useState } from 'react';
+//COMPONENTS
 import Searchbar from 'components/Searchbar';
-import getImagesAPI from 'utils/api/apiService';
 import Loader from 'components/Loader';
 import ImageGallery from 'components/ImageGallery';
 import Button from 'components/Button';
 import Modal from 'components/Modal';
 import Error from 'components/Error';
-
+//HELPERS
 import scroll from 'helpers/scroll';
-
+//UTILS
+import getImagesAPI from 'utils/api/apiService';
+//STYLES
 import { StyledApp } from './App.styled';
-export default class App extends Component {
-  state = {
-    images: [],
-    searchQuery: '',
-    isModalOpen: false,
-    isLoading: false,
-    error: '',
-    currentPage: 1,
-    loadMore: false,
-    modalPic: '',
-    modalAltText: '',
-  };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.searchQuery !== this.state.searchQuery ||
-      prevState.currentPage !== this.state.currentPage
-    ) {
-      this.getImages();
-    }
-    if (prevState.images.length !== 0) {
-      scroll();
-    }
-  }
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loadMore, setLoadMore] = useState(false);
+  const [modalPic, setModalPic] = useState('');
+  const [modalAltText, setModalAltText] = useState('');
 
-  getImages = async () => {
-    const { searchQuery, currentPage } = this.state;
-    try {
-      this.setState({ isLoading: true });
-      const { hits, totalHits } = await getImagesAPI(searchQuery, currentPage);
-      this.setState(prev => ({
-        images: [...prev.images, ...hits],
-        isLoading: false,
-        loadMore: currentPage < Math.ceil(totalHits / 12),
-      }));
-    } catch (error) {
-      this.setState({ error: error.message });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
+  useEffect(() => {
+    if (!searchQuery) return;
+    const getImages = async () => {
+      try {
+        setIsLoading(true);
+        const { hits, totalHits } = await getImagesAPI(
+          searchQuery,
+          currentPage
+        );
 
-  handleSubmit = query => {
+        setImages(prev => [...prev, ...hits]);
+        setLoadMore(currentPage < Math.ceil(totalHits / 12));
+
+        if (currentPage !== 1) {
+          scroll();
+        }
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getImages();
+  }, [currentPage, searchQuery]);
+
+  const handleSubmit = query => {
     if (!query.length) {
       alert('Please enter a more specific word ');
       return;
     }
-    const { images, searchQuery } = this.state;
+
     if (query === searchQuery && images.length !== 0) {
       alert(
         'Please enter a more specific word or explore the button "Load more"'
       );
       return;
     }
-    this.setState({
-      searchQuery: query,
-      images: [],
-      error: '',
-      currentPage: 1,
-    });
+    setSearchQuery(query);
+    setImages([]);
+    setError('');
+    setCurrentPage(1);
   };
 
-  handleClickLoadMore = () =>
-    this.setState(prev => ({
-      currentPage: prev.currentPage + 1,
-    }));
+  const handleClickLoadMore = () => setCurrentPage(prev => prev + 1);
 
-  toggleModal = (modalImg, text) => {
-    this.setState(({ isModalOpen }) => ({
-      isModalOpen: !isModalOpen,
-      modalPic: modalImg,
-      modalAltText: text,
-    }));
+  const toggleModal = () => setIsModalOpen(prev => !prev);
+
+  const handleImageClick = (text, modalImg) => {
+    setModalPic(modalImg);
+    setModalAltText(text);
+    toggleModal();
   };
 
-  render() {
-    const { isLoading, images, loadMore, isModalOpen, error } = this.state;
-    return (
-      <StyledApp>
-        <Searchbar cbOnSubmit={this.handleSubmit} />
-        <ImageGallery images={images} toggleModal={this.toggleModal} />
-        {isLoading && <Loader />}
-        {isModalOpen && (
-          <Modal
-            src={this.state.modalPic}
-            alt={this.state.modalAltText}
-            onClose={this.toggleModal}
-          />
-        )}
-        {loadMore && <Button cbOnClick={this.handleClickLoadMore} />}
-        {error && <Error message={error} />}
-      </StyledApp>
-    );
-  }
-}
+  return (
+    <StyledApp>
+      <Searchbar cbOnSubmit={handleSubmit} />
+      <ImageGallery images={images} handleImageClick={handleImageClick} />
+      {isLoading && <Loader />}
+      {isModalOpen && (
+        <Modal
+          toggleModal={toggleModal}
+          modalPic={modalPic}
+          modalAltText={modalAltText}
+        />
+      )}
+      {loadMore && <Button handleClickLoadMore={handleClickLoadMore} />}
+      {error && <Error error={error} />}
+    </StyledApp>
+  );
+};
+
+export default App;

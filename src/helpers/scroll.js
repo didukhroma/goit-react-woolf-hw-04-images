@@ -1,8 +1,10 @@
 const scroll = () => {
-  const height = document.documentElement.scrollHeight;
-  window.scrollTo({
-    top: height,
-    behavior: 'smooth',
-  });
+  setTimeout(() => {
+    const height = document.documentElement.scrollHeight;
+    window.scrollTo({
+      top: height,
+      behavior: 'smooth',
+    });
+  }, 100);
 };
 export default scroll;

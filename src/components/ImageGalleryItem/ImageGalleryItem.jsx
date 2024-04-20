@@ -1,12 +1,15 @@
+//STYLES
 import { StyledIMG, StyledItem } from './ImageGalleryItem.styled';
 
 export default function ImageGalleryItem({
   source,
   text,
   modalImg,
-  toggleModal,
+  handleImageClick,
 }) {
-  const handleClick = () => toggleModal(modalImg, text);
+  const handleClick = () => {
+    handleImageClick(text, modalImg);
+  };
 
   return (
     <StyledItem onClick={handleClick}>

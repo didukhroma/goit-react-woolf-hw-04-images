@@ -1,5 +1,6 @@
+//CONTEXT
 import { StyledButton } from './Button.styled';
 
-export default function Button({ cbOnClick }) {
-  return <StyledButton onClick={cbOnClick}>Load More</StyledButton>;
+export default function Button({ handleClickLoadMore }) {
+  return <StyledButton onClick={handleClickLoadMore}>Load More</StyledButton>;
 }
